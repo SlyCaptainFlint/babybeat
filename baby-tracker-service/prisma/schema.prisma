@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventType {
+  feed
+  sleep
+  diaper
+}
+
+enum FeedType {
+  solids
+  breastfeeding
+  bottle
+}
+
+enum SleepLocation {
+  crib
+  stroller
+  car
+  carrier
+  bed
+  arms
+  bassinet
+}
+
+enum DiaperType {
+  wet
+  dirty
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  type      EventType
+  timestamp DateTime
+  endTime   DateTime?
+  
+  // Feed-specific fields
+  feedType        FeedType?
+  amount          Int?      // milliliters for bottle, grams for solids
+  leftDuration    Int?      // duration in seconds for left breast
+  rightDuration   Int?      // duration in seconds for right breast
+  
+  // Sleep-specific fields
+  sleepLocation   SleepLocation?
+  
+  // Diaper-specific fields
+  diaperType      DiaperType?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([timestamp])
+  @@index([type, timestamp])
+} 
