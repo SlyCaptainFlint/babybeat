@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#FF6B6B" />
+  
+  <!-- Baby head -->
+  <circle cx="50" cy="40" r="20" fill="white" />
+  
+  <!-- Baby ears -->
+  <circle cx="30" cy="40" r="8" fill="white" />
+  <circle cx="70" cy="40" r="8" fill="white" />
+  
+  <!-- Baby eyes -->
+  <circle cx="42" cy="37" r="3" fill="#FF6B6B" />
+  <circle cx="58" cy="37" r="3" fill="#FF6B6B" />
+  
+  <!-- Baby smile -->
+  <path d="M42 45 Q50 50 58 45" stroke="#FF6B6B" stroke-width="2" fill="none" />
+  
+  <!-- Baby pacifier -->
+  <circle cx="50" cy="53" r="4" fill="white" />
+  <circle cx="50" cy="53" r="2" fill="#FF6B6B" />
+  <path d="M50 57 L50 60" stroke="white" stroke-width="2" />
+  
+  <!-- Heartbeat line -->
+  <path d="M30 85 L40 85 L45 75 L50 95 L55 65 L60 85 L70 85" stroke="white" stroke-width="3" fill="none" />
+</svg> 

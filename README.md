@@ -1,4 +1,4 @@
-# Baby Tracker
+# BabyBeat
 
 A comprehensive baby tracking application that helps parents monitor their baby's daily activities including feeding, sleeping, and diaper changes.
 
@@ -6,81 +6,95 @@ This application was created with support from Cursor AI. My goal was to impleme
 
 ## Project Structure
 
-This repository contains two main components:
+The project consists of two main components:
 
-- **baby-tracker-web**: A React web application for tracking baby activities
-- **baby-tracker-service**: A Node.js backend service that provides the API for the web application
+- **baby-tracker-web**: A React web application for tracking baby activities with BabyBeat
+- **baby-tracker-service**: A Node.js backend service that provides the API for the BabyBeat web application
 
 ## Features
 
-- Track feeding events (bottle, breastfeeding, solids)
+- Track feeding times and amounts
 - Monitor sleep patterns
-- Record diaper changes
-- View data visualizations and trends
+- Log diaper changes
+- Record growth milestones
+- View daily summaries and trends
+- Multiple baby profiles support
 - Responsive design for mobile and desktop
+
+## Tech Stack
+
+### Frontend
+- React with TypeScript
+- Vite for build tooling
+- Material-UI
+- React Router for navigation, data loading
+- Chart.js for data visualization
+
+### Backend
+- Node.js with TypeScript
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- Jest
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
 - PostgreSQL database
 
 ### Backend Setup (baby-tracker-service)
 
 1. Navigate to the service directory:
-   ```
-   cd baby-tracker-service
-   ```
+```bash
+cd baby-tracker-service
+```
 
 2. Install dependencies:
-   ```
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. Create a `.env` file with the following variables:
-   ```
-   DATABASE_URL=postgresql://username:password@localhost:5432/baby_tracker
-   PORT=3001
-   ```
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
+Edit the `.env` file with your database credentials and other configuration.
 
 4. Run database migrations:
-   ```
-   npx prisma migrate dev
-   ```
+```bash
+npx prisma migrate dev
+```
 
-5. Start the server:
-   ```
-   npm run dev
-   ```
+5. Start the development server:
+```bash
+npm run dev
+```
 
 ### Frontend Setup (baby-tracker-web)
 
 1. Navigate to the web directory:
-   ```
-   cd baby-tracker-web
-   ```
+```bash
+cd baby-tracker-web
+```
 
 2. Install dependencies:
-   ```
-   npm install
-   ```
+```bash
+npm install
+```
 
-3. Start the development server:
-   ```
-   npm run dev
-   ```
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
+Edit the `.env` file with your backend API URL.
 
-4. Open your browser and navigate to `http://localhost:5173`
-
-## Offline Support
-
-The application is designed to work offline:
-- The home page will load with cached data when offline
-- An offline indicator appears in the navbar when the service is unreachable
-- The refresh icon can be used to attempt to reconnect to the server
-- Event submissions are properly handled to prevent optimistic updates when offline
+4. Start the development server:
+```bash
+npm run dev
+```
 
 ## License
 

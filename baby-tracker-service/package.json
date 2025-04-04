@@ -1,7 +1,7 @@
 {
   "name": "baby-tracker-service",
   "version": "1.0.0",
-  "description": "Backend service for baby tracker application",
+  "description": "Backend service for BabyBeat application",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

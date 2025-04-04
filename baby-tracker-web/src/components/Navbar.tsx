@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useRevalidator } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Box, CircularProgress, Tooltip } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, CircularProgress, Tooltip, Typography } from '@mui/material';
 import { 
   Home as HomeIcon, 
   BarChart as BarChartIcon,
@@ -17,7 +17,10 @@ export function Navbar() {
   return (
     <AppBar position="static">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ mr: 2, fontWeight: 'bold' }}>
+            BabyBeat
+          </Typography>
           <IconButton
             color={location.pathname === '/' ? 'inherit' : 'default'}
             onClick={() => navigate('/')}
@@ -50,7 +53,7 @@ export function Navbar() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {!isOnline && (
             <Tooltip title="Service is unreachable. Data may be outdated.">
-              <IconButton color="error" size="large">
+              <IconButton color="inherit" size="large">
                 <WifiOffIcon />
               </IconButton>
             </Tooltip>

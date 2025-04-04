@@ -8,34 +8,34 @@ import {
 
 export const eventColors = {
   feed: {
-    main: '#2196f3',
+    main: '#1976d2',
     light: '#e3f2fd',
     icon: Restaurant,
     variants: {
       breastfeeding: {
-        main: '#2196f3',
+        main: '#1976d2',
         light: '#e3f2fd',
         icon: ChildCare,
       },
       bottle: {
-        main: '#2196f3',
+        main: '#1976d2',
         light: '#e3f2fd',
         icon: LocalDrink,
       },
       solids: {
-        main: '#2196f3',
+        main: '#1976d2',
         light: '#e3f2fd',
         icon: Restaurant,
       },
     },
   },
   sleep: {
-    main: '#9c27b0',
+    main: '#7b1fa2',
     light: '#f3e5f5',
     icon: Bed,
   },
   diaper: {
-    main: '#4caf50',
+    main: '#2e7d32',
     light: '#e8f5e9',
     icon: ChildCare,
   },
