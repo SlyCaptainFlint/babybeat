@@ -12,9 +12,8 @@
     "db:init": "node scripts/init-db.js",
     "predev": "npm run db:init",
     "test:setup": "node scripts/setup-test-db.js",
-    "test:cleanup": "node scripts/cleanup-test-db.js",
-    "test": "npm run test:setup && jest && npm run test:cleanup",
-    "test:watch": "npm run test:setup && jest --watch && npm run test:cleanup"
+    "test": "npm run test:setup && jest",
+    "test:watch": "npm run test:setup && jest --watch"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",

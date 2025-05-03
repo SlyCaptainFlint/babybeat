@@ -50,6 +50,7 @@ export const getEventIcon = (type: EventType, feedType?: FeedType) => {
         case FeedType.SOLIDS:
           return Restaurant;
         case FeedType.BREASTFEEDING:
+        default:
           return ChildCare;
       }
     case EventType.SLEEP:

@@ -29,10 +29,10 @@ interface BackupConfig {
 const defaultUser = os.platform() === 'darwin' ? os.userInfo().username : 'postgres';
 
 const config: BackupConfig = {
-  backupDir: process.env.BACKUP_DIR || './backups',
+  backupDir: process.env.BACKUP_DIR || './babybeat_backups',
   dailyBackupsToKeep: 7,
   weeklyBackupsToKeep: 4,
-  dbName: process.env.DATABASE_NAME || 'baby_tracker',
+  dbName: process.env.DATABASE_NAME || 'babybeat',
   dbUser: process.env.DATABASE_USER || defaultUser,
   dbHost: process.env.DATABASE_HOST || 'localhost',
   dbPort: process.env.DATABASE_PORT || '5432',

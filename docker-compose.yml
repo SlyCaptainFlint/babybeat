@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  service:
+    build: 
+      context: ./baby-tracker-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./baby-tracker-service/service.env
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./baby-tracker-web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    env_file:
+      - ./baby-tracker-web/web.env
+    depends_on:
+      - service
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./baby-tracker-service/db.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backup:
+    build:
+      context: ./baby-tracker-service
+      dockerfile: Dockerfile.backup
+    restart: unless-stopped
+    env_file:
+      - ./baby-tracker-service/service.env
+    volumes:
+      - ./babybeat_backups:/backups
+    depends_on:
+      - db
+
+volumes:
+  postgres_data: 

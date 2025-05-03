@@ -9,6 +9,9 @@ baby-tracker/
 .env.production.local
 .env.test
 .env.*
+# Specific env files in subdirectories
+baby-tracker-service/*.env
+baby-tracker-web/*.env
 
 # Dependencies
 node_modules/
@@ -43,4 +46,7 @@ Thumbs.db
 # Backup files
 backups/
 *.csv
-*.sql 
+*.sql
+
+# Backups
+/babybeat_backups/ 

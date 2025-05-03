@@ -3,68 +3,75 @@ import { ApiService } from '../services/api';
 import { addMinutes, subDays } from 'date-fns';
 
 function generateRandomEvent(date: Date): Omit<Event, 'id'> {
-  const types: EventType[] = ['feed', 'sleep', 'diaper'];
+  const types = [EventType.FEED, EventType.SLEEP, EventType.DIAPER];
   const type = types[Math.floor(Math.random() * types.length)];
   const baseEvent = {
     timestamp: date.toISOString(),
   };
 
   switch (type) {
-    case 'feed': {
-      const feedTypes: FeedType[] = ['bottle', 'breastfeeding', 'solids'];
+    case EventType.FEED: {
+      const feedTypes = [FeedType.BOTTLE, FeedType.BREASTFEEDING, FeedType.SOLIDS];
       const feedType = feedTypes[Math.floor(Math.random() * feedTypes.length)];
       
       switch (feedType) {
-        case 'breastfeeding': {
+        case FeedType.BREASTFEEDING: {
           const event: Omit<BreastfeedingEvent, 'id'> = {
             ...baseEvent,
-            type: 'feed',
-            feedType: 'breastfeeding',
+            type: EventType.FEED,
+            feedType: FeedType.BREASTFEEDING,
             leftDuration: Math.floor(Math.random() * 15) + 5,
             rightDuration: Math.floor(Math.random() * 15) + 5,
           };
           return event;
         }
-        case 'bottle': {
+        case FeedType.BOTTLE: {
           const event: Omit<BottleFeedEvent, 'id'> = {
             ...baseEvent,
-            type: 'feed',
-            feedType: 'bottle',
+            type: EventType.FEED,
+            feedType: FeedType.BOTTLE,
             amount: Math.floor(Math.random() * 100) + 50,
           };
           return event;
         }
-        case 'solids': {
+        case FeedType.SOLIDS: {
           const event: Omit<SolidsFeedEvent, 'id'> = {
             ...baseEvent,
-            type: 'feed',
-            feedType: 'solids',
+            type: EventType.FEED,
+            feedType: FeedType.SOLIDS,
             amount: Math.floor(Math.random() * 100) + 50,
           };
           return event;
         }
       }
     }
-    case 'sleep': {
-      const locations: SleepLocation[] = ['crib', 'stroller', 'car', 'carrier', 'bed', 'arms'];
+    case EventType.SLEEP: {
+      const locations = [
+        SleepLocation.CRIB,
+        SleepLocation.STROLLER,
+        SleepLocation.CAR,
+        SleepLocation.CARRIER,
+        SleepLocation.BED,
+        SleepLocation.ARMS,
+      ];
       const sleepLocation = locations[Math.floor(Math.random() * locations.length)];
       const duration = Math.floor(Math.random() * 180) + 30; // 30-210 minutes
       
       const event: Omit<SleepEvent, 'id'> = {
         ...baseEvent,
-        type: 'sleep',
+        type: EventType.SLEEP,
         sleepLocation,
         endTime: addMinutes(date, duration).toISOString(),
       };
       return event;
     }
-    case 'diaper': {
-      const diaperTypes: DiaperType[] = ['wet', 'dirty'];
+    case EventType.DIAPER: {
+      const diaperTypes = [DiaperType.WET, DiaperType.DIRTY];
       const diaperType = diaperTypes[Math.floor(Math.random() * diaperTypes.length)];
       
       const event: Omit<DiaperEvent, 'id'> = {
         ...baseEvent,
-        type: 'diaper',
+        type: EventType.DIAPER,
         diaperType,
       };
       return event;

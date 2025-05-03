@@ -11,7 +11,7 @@ import { ValidationError } from './errors/ValidationError';
 dotenv.config();
 
 export const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 const eventService = new EventService();
 const aggregationHelper = new AggregationHelper();
 
