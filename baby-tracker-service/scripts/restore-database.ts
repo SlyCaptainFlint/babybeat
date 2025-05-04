@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
 import { config as loadEnv } from 'dotenv';
+import { parse } from 'pg-connection-string';
 
 // Load environment variables
 loadEnv();
@@ -14,6 +15,7 @@ interface RestoreConfig {
   dbUser: string;
   dbHost: string;
   dbPort: string;
+  dbPassword?: string;
   // Whether to drop the existing database if it exists
   dropExisting: boolean;
 }
@@ -23,13 +25,41 @@ interface ExecError extends Error {
   stdout?: string;
 }
 
-const restoreConfig: RestoreConfig = {
-  dbName: process.env.DATABASE_NAME || 'baby_tracker',
-  dbUser: process.env.DATABASE_USER || 'postgres',
-  dbHost: process.env.DATABASE_HOST || 'localhost',
-  dbPort: process.env.DATABASE_PORT || '5432',
-  dropExisting: false,
-};
+// Function to initialize config from DATABASE_URL or defaults
+function initializeConfig(): RestoreConfig {
+  const dbUrl = process.env.DATABASE_URL;
+  let config: Partial<RestoreConfig> = {};
+
+  if (dbUrl) {
+    try {
+      const parsedUrl = parse(dbUrl);
+      config.dbHost = parsedUrl.host || 'localhost';
+      config.dbPort = parsedUrl.port || '5432';
+      config.dbUser = parsedUrl.user || 'postgres';
+      config.dbName = parsedUrl.database || 'babybeat';
+      config.dbPassword = parsedUrl.password || undefined;
+    } catch (e) {
+      console.error("Error parsing DATABASE_URL, using defaults:", e);
+    }
+  }
+
+  // Apply defaults if not parsed from URL
+  return {
+    dbHost: config.dbHost || 'localhost',
+    dbPort: config.dbPort || '5432',
+    dbUser: config.dbUser || 'postgres',
+    dbName: config.dbName || 'babybeat',
+    dbPassword: config.dbPassword,
+    dropExisting: false,
+  };
+}
+
+const restoreConfig = initializeConfig();
+
+// Add PGPASSWORD to environment for psql commands if password exists
+if (restoreConfig.dbPassword) {
+  process.env.PGPASSWORD = restoreConfig.dbPassword;
+}
 
 async function checkBackupFile(backupFile: string) {
   if (!existsSync(backupFile)) {
@@ -63,7 +93,7 @@ async function dropDatabase() {
     await execAsync(`psql -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} -d postgres -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${restoreConfig.dbName}' AND pid <> pg_backend_pid();"`);
   } catch (error) {
     const err = error as ExecError;
-    console.warn('Warning: Could not terminate existing connections:', err.message);
+    console.warn('Warning: Could not terminate existing connections (this might be okay):', err.stderr || err.message);
   }
   
   // Drop the database
@@ -72,7 +102,7 @@ async function dropDatabase() {
     console.log('Database dropped successfully');
   } catch (error) {
     const err = error as ExecError;
-    throw new Error(`Failed to drop database: ${err.message}`);
+    throw new Error(`Failed to drop database: ${err.stderr || err.message}`);
   }
 }
 
@@ -84,47 +114,21 @@ async function createDatabase() {
     console.log('Database created successfully');
   } catch (error) {
     const err = error as ExecError;
-    throw new Error(`Failed to create database: ${err.message}`);
+    throw new Error(`Failed to create database: ${err.stderr || err.message}`);
   }
 }
 
 async function restoreDatabase(backupFile: string) {
-  console.log(`Restoring database from backup: ${backupFile}`);
+  console.log(`Restoring database ${restoreConfig.dbName} from backup: ${backupFile}`);
   
   try {
-    // First restore to a temporary database
-    const tempDbName = `${restoreConfig.dbName}_temp`;
-    console.log(`Creating temporary database: ${tempDbName}`);
-    await execAsync(`createdb -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} ${tempDbName}`);
-    
-    try {
-      // Restore to the temporary database
-      console.log('Restoring to temporary database...');
-      const command = `pg_restore -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} -d ${tempDbName} ${backupFile}`;
-      await execAsync(command);
-      
-      // Drop the target database if it exists
-      if (await checkDatabaseExists()) {
-        await dropDatabase();
-      }
-      
-      // Rename the temporary database to the target database
-      console.log('Moving restored database to final location...');
-      await execAsync(`psql -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} -d postgres -c "ALTER DATABASE ${tempDbName} RENAME TO ${restoreConfig.dbName};"`);
-      
-      console.log('Database restored successfully');
-    } catch (error) {
-      // Clean up the temporary database if something goes wrong
-      try {
-        await execAsync(`dropdb -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} ${tempDbName}`);
-      } catch (cleanupError) {
-        console.warn('Warning: Could not clean up temporary database:', (cleanupError as ExecError).message);
-      }
-      throw error;
-    }
+    const command = `pg_restore -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} --clean --if-exists -d ${restoreConfig.dbName} ${backupFile}`;
+    await execAsync(command);
+    console.log('Database restored successfully');
+
   } catch (error) {
     const err = error as ExecError;
-    throw new Error(`Failed to restore database: ${err.message}`);
+    throw new Error(`Failed to restore database: ${err.stderr || err.message}`);
   }
 }
 
@@ -144,21 +148,14 @@ async function main() {
     // Verify backup file
     await checkBackupFile(backupFile);
 
-    // Check if database exists
+    // Check if target database exists
     const dbExists = await checkDatabaseExists();
     
-    if (dbExists) {
-      if (restoreConfig.dropExisting) {
+    if (dbExists && restoreConfig.dropExisting) {
         await dropDatabase();
-      } else {
-        console.error(`Database ${restoreConfig.dbName} already exists. Use --drop-existing flag to drop it first.`);
-        process.exit(1);
-      }
-    }
-
-    // Create new database if needed
-    if (!dbExists || restoreConfig.dropExisting) {
-      await createDatabase();
+        await createDatabase();
+    } else if (!dbExists) {
+        await createDatabase();
     }
 
     // Restore the database
