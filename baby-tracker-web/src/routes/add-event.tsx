@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams, useLocation, Form, useNavigation } from 'react-router-dom';
 import {
   Box,
@@ -53,15 +53,9 @@ export function Component() {
   const isSubmitting = navigation.state === 'submitting';
   const existingEvent = routerLocation.state?.event as Event | undefined;
   const selectedDate = routerLocation.state?.selectedDate;
-  const prevNavigationState = useRef(navigation.state);
-  
-  // Navigate back to home after successful submission
-  useEffect(() => {
-    if (prevNavigationState.current === 'submitting' && navigation.state === 'idle') {
-      navigate(selectedDate ? `/?date=${selectedDate}` : '/');
-    }
-    prevNavigationState.current = navigation.state;
-  }, [navigation.state, navigate, selectedDate]);
+
+  // Determine the date context for the redirect
+  const dateForRedirect = selectedDate || format(new Date(), 'yyyy-MM-dd');
   
   // Validate that type is a valid event type
   if (!eventType || !Object.values(EventType).includes(eventType as EventType)) {
@@ -162,6 +156,9 @@ export function Component() {
   return (
     <Paper elevation={2} sx={{ p: 3 }}>
       <Form method={existingEvent ? 'put' : 'post'}>
+        {/* Add hidden input for the date context */}
+        <input type="hidden" name="date" value={dateForRedirect} />
+
         {existingEvent && (
           <input type="hidden" name="id" value={existingEvent.id} />
         )}

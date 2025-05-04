@@ -101,6 +101,13 @@ async function eventAction({ request }: ActionFunctionArgs) {
   const rawEvent = Object.fromEntries(formData);
   console.log('Raw form data:', rawEvent);
   
+  // Get the date from form data
+  const date = rawEvent.date as string | undefined;
+  // Remove date from event object if it exists, as it's not part of the Event model
+  if (rawEvent.date) {
+    delete rawEvent.date;
+  }
+  
   // Convert numeric fields to numbers
   const event = {
     ...rawEvent,
@@ -111,36 +118,43 @@ async function eventAction({ request }: ActionFunctionArgs) {
   
   console.log('Processed event data:', event);
   
-  if (event.id) {
-    console.log('Updating event:', event.id);
-    return ApiService.updateEvent(event as any);
-  } else {
-    console.log('Creating new event');
-    return ApiService.createEvent(event as any);
+  try {
+    if (event.id) {
+      console.log('Updating event:', event.id);
+      await ApiService.updateEvent(event as any);
+    } else {
+      console.log('Creating new event');
+      await ApiService.createEvent(event as any);
+    }
+    // Redirect back to the homepage with the date
+    return redirect(date ? `/?date=${date}` : '/');
+  } catch (error) {
+    // Handle API errors (e.g., display validation messages)
+    // For now, just log and potentially re-throw or return error info
+    console.error("API Error in eventAction:", error);
+    // You might want to return the error to display it in the form
+    return { error }; 
   }
 }
 
 // Action for deleting events
 async function deleteEventAction({ params, request }: ActionFunctionArgs) {
   if (!params.id) throw new Error('Event ID is required');
-  await ApiService.deleteEvent(params.id);
   
-  // Try to get the date from the referrer
+  // Try to get the date from the request URL query parameters
+  const url = new URL(request.url);
+  const date = url.searchParams.get('date') as string | null;
+
   try {
-    const referer = request.headers.get('Referer');
-    if (referer) {
-      const refererUrl = new URL(referer);
-      const date = refererUrl.searchParams.get('date');
-      if (date) {
-        return redirect(`/?date=${date}`);
-      }
-    }
+    await ApiService.deleteEvent(params.id);
+    // Redirect back to the homepage with the date if available
+    return redirect(date ? `/?date=${date}` : '/');
   } catch (error) {
-    console.error('Error processing referrer:', error);
+    console.error("API Error in deleteEventAction:", error);
+    // Handle potential errors during deletion
+    // Maybe redirect back with an error flag?
+    return redirect(date ? `/?date=${date}&error=deleteFailed` : '/?error=deleteFailed'); 
   }
-  
-  // Default fallback
-  return redirect('/');
 }
 
 const router = createBrowserRouter([

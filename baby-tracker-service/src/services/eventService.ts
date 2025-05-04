@@ -1,6 +1,5 @@
 import { PrismaClient, Event, EventType, FeedType, DiaperType, SleepLocation } from '@prisma/client';
 import { AggregationHelper, AggregationData } from './aggregationHelper';
-import { startOfDay, endOfDay } from 'date-fns';
 import { ValidationError } from '../errors/ValidationError';
 
 const prisma = new PrismaClient();
@@ -27,9 +26,10 @@ export class EventService {
   async readEvents(request: GetEventsRequest): Promise<GetEventsResponse> {
     const { startDate, endDate, limit = 100 } = request;
     
-    // Parse dates using date-fns
-    const startDateTime = startOfDay(new Date(startDate));
-    const endDateTime = endOfDay(new Date(endDate));
+    // Parse the incoming ISO strings directly into Date objects
+    // The client already calculated the correct start/end in local time and sent as UTC
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
     
     console.log('Querying events between:', { 
       startDateTime: startDateTime.toISOString(),

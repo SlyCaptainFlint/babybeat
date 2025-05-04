@@ -315,24 +315,15 @@ const EventCard = ({ event, onEdit, onDelete }: { event: Event, onEdit: (event: 
             </Typography>
           </Stack>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-
-              <Stack direction="row" spacing={1}>
-                <IconButton 
-                  size="small" 
-                  onClick={() => onEdit(event)}
-                  sx={{ color: 'text.secondary' }}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton 
-                  size="small" 
-                  onClick={() => onDelete(event.id)}
-                  sx={{ color: 'text.secondary' }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Stack>
+            <Stack direction="row" spacing={1}>
+              <IconButton size="small" onClick={() => onEdit(event)} aria-label="Edit event">
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" onClick={() => onDelete(event.id)} aria-label="Delete event">
+                <DeleteIcon fontSize="small" />
+              </IconButton>
             </Stack>
+          </Stack>
         </Stack>
       </Box>
     </Paper>
@@ -340,39 +331,40 @@ const EventCard = ({ event, onEdit, onDelete }: { event: Event, onEdit: (event: 
 };
 
 export default function Home() {
-  const { apiResponse, date } = useLoaderData() as { apiResponse: Promise<{ events: Event[] }>, date: string };
+  const { apiResponse, date: selectedDate } = useLoaderData() as { apiResponse: Promise<any>, date: string };
   const navigate = useNavigate();
   const submit = useSubmit();
-
-  // Convert UTC date string to local date for display
-  const localDate = new Date(date + 'T00:00:00');
+  const [currentDate, setCurrentDate] = useState(parseISO(selectedDate)); // Manage date state
 
   const handleDateChange = (newDate: Date | null) => {
     if (newDate) {
-      // Convert local date to UTC date string for API
-      const utcDate = format(newDate, 'yyyy-MM-dd');
-      navigate(`/?date=${utcDate}`);
+      setCurrentDate(newDate);
+      const dateString = format(newDate, 'yyyy-MM-dd');
+      navigate(`/?date=${dateString}`);
     }
   };
 
   const handleAddEvent = (type: string) => {
-    navigate(`/add/${type}`, { state: { selectedDate: date } });
+    navigate(`/add/${type}`, { state: { selectedDate: format(currentDate, 'yyyy-MM-dd') } });
   };
 
   const handleEditEvent = (event: Event) => {
-    navigate(`/add/${event.type}`, { state: { event } });
+    navigate(`/add/${event.type}`, { state: { event, selectedDate: format(currentDate, 'yyyy-MM-dd') } });
   };
 
   const handleDeleteEvent = (eventId: string) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
-      submit(null, {
-        method: 'delete',
-        action: `/events/${eventId}/delete`,
+      // Format the date to include in the URL
+      const formattedDate = format(currentDate, 'yyyy-MM-dd');
+      // Submit to the action URL with the date as a query parameter
+      submit(null, { 
+        method: 'post', 
+        action: `/events/${eventId}/delete?date=${formattedDate}` 
       });
     }
   };
 
-  const isToday = isSameDay(localDate, new Date());
+  const isToday = isSameDay(currentDate, new Date());
 
   return (
     <Await resolve={apiResponse}>
@@ -389,7 +381,7 @@ export default function Home() {
                 >
                   <IconButton
                     onClick={() => {
-                      const prevDay = new Date(localDate);
+                      const prevDay = new Date(currentDate);
                       prevDay.setDate(prevDay.getDate() - 1);
                       handleDateChange(prevDay);
                     }}
@@ -398,7 +390,7 @@ export default function Home() {
                     <ChevronLeftIcon />
                   </IconButton>
                   <DatePicker
-                    value={localDate}
+                    value={currentDate}
                     onChange={handleDateChange}
                     maxDate={new Date()}
                     slotProps={{
@@ -410,7 +402,7 @@ export default function Home() {
                   />
                   <IconButton
                     onClick={() => {
-                      const nextDay = new Date(localDate);
+                      const nextDay = new Date(currentDate);
                       nextDay.setDate(nextDay.getDate() + 1);
                       handleDateChange(nextDay);
                     }}
