@@ -7,9 +7,9 @@ FROM node:20-slim
 WORKDIR /app
 
 # Install PostgreSQL client for pg_dump AND cron
-RUN apt-get update && \\
-    apt-get install -y --no-install-recommends postgresql-client cron && \\
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client cron \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -26,9 +26,9 @@ COPY crontab.backup /etc/cron.d/backup-cron
 
 # Give execution rights on the cron job and proper ownership/permissions
 # Cron requires files in cron.d to be owned by root and not be group/world-writable.
-RUN chmod 0644 /etc/cron.d/backup-cron && \\
-    chown root:root /etc/cron.d/backup-cron && \\
-    crontab /etc/cron.d/backup-cron
+# No need to run 'crontab', the cron daemon reads /etc/cron.d automatically.
+RUN chmod 0644 /etc/cron.d/backup-cron \
+    && chown root:root /etc/cron.d/backup-cron
 
 # Run the command on container startup
 # Starts cron in the foreground (essential for Docker containers)
