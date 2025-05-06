@@ -1,7 +1,8 @@
 import { Event, SleepLocation, DiaperType } from '../types';
 import { errorService } from './errorService';
 
-const API_BASE_URL = 'http://localhost:3000/api';  
+// Read base URL from Vite environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3050/api'; 
 
 export interface EventsResponse {
   events: Event[];

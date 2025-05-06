@@ -4,6 +4,11 @@ import { existsSync } from 'fs';
 import { config as loadEnv } from 'dotenv';
 import { parse } from 'pg-connection-string';
 
+// --- BEGIN DEBUG LOGGING ---
+console.log("--- Running restore-database.ts ---");
+console.log("Raw DATABASE_URL env var:", process.env.DATABASE_URL);
+// --- END DEBUG LOGGING ---
+
 // Load environment variables
 loadEnv();
 
@@ -41,10 +46,12 @@ function initializeConfig(): RestoreConfig {
     } catch (e) {
       console.error("Error parsing DATABASE_URL, using defaults:", e);
     }
+  } else {
+    console.warn("DATABASE_URL environment variable not found!");
   }
 
   // Apply defaults if not parsed from URL
-  return {
+  const restoredConfig = {
     dbHost: config.dbHost || 'localhost',
     dbPort: config.dbPort || '5432',
     dbUser: config.dbUser || 'postgres',
@@ -52,6 +59,8 @@ function initializeConfig(): RestoreConfig {
     dbPassword: config.dbPassword,
     dropExisting: false,
   };
+  console.log("Initialized restoreConfig:", restoredConfig);
+  return restoredConfig;
 }
 
 const restoreConfig = initializeConfig();
@@ -122,7 +131,8 @@ async function restoreDatabase(backupFile: string) {
   console.log(`Restoring database ${restoreConfig.dbName} from backup: ${backupFile}`);
   
   try {
-    const command = `pg_restore -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} --clean --if-exists -d ${restoreConfig.dbName} ${backupFile}`;
+    // Add --no-owner and --no-privileges flags
+    const command = `pg_restore -h ${restoreConfig.dbHost} -p ${restoreConfig.dbPort} -U ${restoreConfig.dbUser} --no-owner --no-privileges --clean --if-exists -d ${restoreConfig.dbName} ${backupFile}`;
     await execAsync(command);
     console.log('Database restored successfully');
 
@@ -134,6 +144,15 @@ async function restoreDatabase(backupFile: string) {
 
 async function main() {
   try {
+    // Log relevant PG* environment variables
+    console.log("--- Checking PG Environment Variables ---");
+    try {
+      await execAsync('env | grep PG || true'); // Check PG vars, ignore error if none found
+    } catch (envError) {
+      console.warn("Could not check PG env vars:", envError);
+    }
+    console.log("---------------------------------------");
+
     // Get backup file path from command line arguments
     const backupFile = process.argv[2];
     if (!backupFile) {

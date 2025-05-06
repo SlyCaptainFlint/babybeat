@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
+# Ensure tsc is executable
+RUN chmod +x ./node_modules/.bin/tsc
 
 COPY . .
 RUN npm run build

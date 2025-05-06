@@ -21,6 +21,9 @@ RUN npm install
 # Copy the scripts directory
 COPY scripts ./scripts
 
+# Make debug script executable (start.sh is handled elsewhere if needed)
+RUN chmod +x ./scripts/debug-connection.sh
+
 # Copy the crontab file to the cron directory
 COPY crontab.backup /etc/cron.d/backup-cron
 

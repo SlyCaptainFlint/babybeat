@@ -1,27 +1,39 @@
-version: '3.8'
-
 services:
   service:
     build: 
       context: ./baby-tracker-service
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3050:3000"
     env_file:
       - ./baby-tracker-service/service.env
+    labels:
+      - traefik.http.routers.babybeatapi.rule=Host(`${APP_HOSTNAME}`) && PathPrefix(`/api/`)
+      - traefik.http.services.babybeatapi.loadbalancer.server.port=3000
+      - traefik.http.routers.babybeatapi.tls=true
+      - traefik.http.routers.babybeatapi.tls.certresolver=${CERT_RESOLVER}
     depends_on:
       - db
+    networks:
+      - babybeat
+      - traefik
 
   web:
     build:
       context: ./baby-tracker-web
       dockerfile: Dockerfile
     ports:
-      - "80:80"
-    env_file:
-      - ./baby-tracker-web/web.env
+      - "800:80"
     depends_on:
       - service
+    labels:
+      - traefik.http.routers.babybeat.rule=Host(`${APP_HOSTNAME}`)
+      - traefik.http.services.babybeat.loadbalancer.server.port=80
+      - traefik.http.routers.babybeat.tls=true
+      - traefik.http.routers.babybeat.tls.certresolver=${CERT_RESOLVER}
+    networks:
+      - babybeat
+      - traefik
 
   db:
     image: postgres:16-alpine
@@ -31,6 +43,8 @@ services:
       - ./baby-tracker-service/db.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - babybeat
 
   backup:
     build:
@@ -43,6 +57,15 @@ services:
       - ./babybeat_backups:/backups
     depends_on:
       - db
+    networks:
+      - babybeat
 
 volumes:
-  postgres_data: 
+  postgres_data:
+
+networks:
+  babybeat:
+    name: babybeat_network
+  traefik:
+    name: traefik_network
+    external: true

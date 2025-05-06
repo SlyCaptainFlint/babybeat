@@ -11,7 +11,7 @@ baby-tracker/
 .env.*
 # Specific env files in subdirectories
 baby-tracker-service/*.env
-baby-tracker-web/*.env
+baby-tracker-web/.env*
 
 # Dependencies
 node_modules/
