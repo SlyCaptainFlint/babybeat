@@ -13,7 +13,6 @@ export enum FeedType {
 export enum DiaperType {
   WET = 'wet',
   DIRTY = 'dirty',
-  BOTH = 'both'
 }
 
 export enum SleepLocation {

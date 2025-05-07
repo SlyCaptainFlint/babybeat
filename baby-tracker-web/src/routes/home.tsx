@@ -23,7 +23,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
-import { Event, EventType, FeedType } from '../types';
+import { Event, EventType, FeedType, DiaperType } from '../types';
 import { format, parseISO, differenceInMinutes, formatDistanceToNow, isSameDay } from 'date-fns';
 import { eventColors, getEventIcon, getEventColor } from '../theme/eventStyles';
 
@@ -149,14 +149,10 @@ const DailySummary = ({ events = [], onAddEvent }: { events?: Event[], onAddEven
 
   // Calculate diaper summary
   const diaperSummary = events
-    .filter(e => e.type === 'diaper')
-    .reduce((acc, event: any) => {
-      if (event.diaperType === 'wet') acc.wet++;
-      else if (event.diaperType === 'dirty') acc.dirty++;
-      else if (event.diaperType === 'both') {
-        acc.wet++;
-        acc.dirty++;
-      }
+    .filter(e => e.type === EventType.DIAPER)
+    .reduce((acc, event) => {
+      if (event.diaperType === DiaperType.WET) acc.wet++;
+      else if (event.diaperType === DiaperType.DIRTY) acc.dirty++;
       return acc;
     }, { wet: 0, dirty: 0 });
 
