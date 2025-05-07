@@ -101,25 +101,34 @@ export function Component() {
       : format(new Date(), 'HH:mm')
   );
   const [feedType, setFeedType] = useState<FeedType>(
-    existingEvent?.type === EventType.FEED
+    existingEvent?.type === EventType.FEED && existingEvent.feedType
       ? existingEvent.feedType
       : FeedType.BOTTLE
   );
-  const [amount, setAmount] = useState(
-    existingEvent?.type === EventType.FEED && 'amount' in existingEvent
-      ? existingEvent.amount.toString()
-      : ''
-  );
-  const [leftDuration, setLeftDuration] = useState(
-    existingEvent?.type === EventType.FEED && 'leftDuration' in existingEvent
-      ? existingEvent.leftDuration.toString()
-      : ''
-  );
-  const [rightDuration, setRightDuration] = useState(
-    existingEvent?.type === EventType.FEED && 'rightDuration' in existingEvent
-      ? existingEvent.rightDuration.toString()
-      : ''
-  );
+  const [amount, setAmount] = useState(() => {
+    if (existingEvent?.type === EventType.FEED) {
+      if (existingEvent.feedType === FeedType.BOTTLE || existingEvent.feedType === FeedType.SOLIDS) {
+        return existingEvent.amount != null ? existingEvent.amount.toString() : '';
+      }
+    }
+    return '';
+  });
+  const [leftDuration, setLeftDuration] = useState(() => {
+    if (existingEvent?.type === EventType.FEED) {
+      if (existingEvent.feedType === FeedType.BREASTFEEDING) {
+        return existingEvent.leftDuration != null ? existingEvent.leftDuration.toString() : '';
+      }
+    }
+    return '';
+  });
+  const [rightDuration, setRightDuration] = useState(() => {
+    if (existingEvent?.type === EventType.FEED) {
+      if (existingEvent.feedType === FeedType.BREASTFEEDING) {
+        return existingEvent.rightDuration != null ? existingEvent.rightDuration.toString() : '';
+      }
+    }
+    return '';
+  });
   const [sleepLocation, setSleepLocation] = useState<SleepLocation>(
     existingEvent?.type === EventType.SLEEP
       ? existingEvent.sleepLocation
