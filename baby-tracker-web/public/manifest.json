@@ -1,0 +1,19 @@
+{
+  "name": "BabyBeat",
+  "short_name": "BabyBeat",
+  "description": "Your digital baby monitoring solution",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a90e2",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "scope": "/"
+}
